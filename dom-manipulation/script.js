@@ -30,7 +30,7 @@ function updateCategoryOptions() {
 }
 
 // Show a random quote based on selected category
-function displayRandomQuote() {
+function showRandomQuote() {
   const selectedCategory = categorySelect.value;
   const filteredQuotes = selectedCategory === "all"
     ? quotes
@@ -64,7 +64,7 @@ function addQuote() {
 
 
 // Event listeners
-newQuoteBtn.addEventListener("click", displayRandomQuote);
+newQuoteBtn.addEventListener("click", showRandomQuote);
 addQuoteBtn.addEventListener("click", addQuote);
 
 // Initialize category list
