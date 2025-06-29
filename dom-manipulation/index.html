@@ -5,49 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Quote Generator</title>
   <link rel="stylesheet" href="styles.css">
-
 </head>
 <body>
-     <h3>Filter by Category</h3>
-    <select id="categoryFilter" onchange="filterQuotes()">
-    <option value="all">All Categories</option>
-   </select>
-
 
   <h1>Dynamic Quote Generator</h1>
 
+  <!-- Filter Dropdown -->
+  <h3>Filter by Category</h3>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
+
+  <!-- Random Quote Dropdown -->
   <label for="categorySelect">Choose a category:</label>
   <select id="categorySelect">
     <option value="all">All</option>
   </select>
   <button id="newQuote">Show New Quote</button>
 
+  <!-- Display Area -->
   <div id="quoteDisplay">Click "Show New Quote" to begin.</div>
 
+  <!-- Add Quote Form -->
   <div id="quoteForm">
     <h3>Add a New Quote</h3>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
     <button id="addQuoteBtn">Add Quote</button>
-
-    <!-- Import & Export Buttons -->
-    <h3>Manage Quotes (Import/Export)</h3>
-   <input type="file" id="importFile" accept=".json" />
-   <button id="exportBtn">Export Quotes as JSON</button>
-
-   <!-- Sync Button -->
-<button onclick="syncWithServer()">Sync Quotes Now</button>
-
-<!-- Notification Area -->
-<div id="notification" style="display: none; background: #d1ecf1; padding: 10px; margin-top: 10px; border-radius: 5px;"></div>
-
-
   </div>
 
+  <!-- Import & Export Buttons -->
+  <h3>Manage Quotes (Import/Export)</h3>
+  <input type="file" id="importFile" accept=".json" />
+  <button id="exportBtn">Export Quotes as JSON</button>
 
+  <!-- Sync Button -->
+  <button onclick="syncWithServer()">Sync Quotes Now</button>
 
-  
+  <!-- Notification Area -->
+  <div id="notification" style="display: none; background: #d1ecf1; padding: 10px; margin-top: 10px; border-radius: 5px;"></div>
 
+  <!-- JavaScript -->
   <script src="script.js"></script>
+
 </body>
 </html>
