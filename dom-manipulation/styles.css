@@ -1,0 +1,21 @@
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    #quoteDisplay {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      font-size: 1.2em;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    #quoteForm {
+      margin-top: 20px;
+    }
+  
