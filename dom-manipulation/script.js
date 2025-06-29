@@ -3,6 +3,10 @@ let quotes = [
   { text: "The best way to predict the future is to invent it.", category: "inspiration" },
   { text: "Do not be afraid to give up the good to go for the great.", category: "motivation" },
   { text: "Success usually comes to those who are too busy to be looking for it.", category: "success" }
+//   { text: "Knowledge is power.", category: "education" },
+//   { text: "Believe you can and you're halfway there.", category: "confidence" },
+//   { text: "If you want to lift yourself up, lift up someone else.", category: "kindness" },
+//   { text: "Every strike brings me closer to the next home run.", category: "perseverance" }
 ];
 
 // DOM references
@@ -51,13 +55,13 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
-  updateCategoryOptions();
-
+  quotes.push({ text, category });                     // ✅ Adds to array
+  updateCategoryOptions();                             // ✅ Updates dropdown (DOM)
   newQuoteText.value = "";
   newQuoteCategory.value = "";
   alert("Quote added!");
 }
+
 
 // Event listeners
 newQuoteBtn.addEventListener("click", showRandomQuote);
