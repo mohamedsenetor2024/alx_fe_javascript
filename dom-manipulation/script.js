@@ -66,6 +66,7 @@ function populateCategories() {
  */
 async function fetchQuotesFromServer() {
   try {
+    showNotification("Fetching quotes from server...", "info");
     const res = await fetch(mockServerEndpoint);
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
@@ -89,6 +90,42 @@ async function fetchQuotesFromServer() {
 }
 
 /**
+ * Sends a new quote to the mock server using a POST request.
+ * @param {Object} quoteData - The quote object to send ({text, category}).
+ * @returns {Promise<boolean>} True if the POST was successful, false otherwise.
+ */
+async function postQuoteToServer(quoteData) {
+  try {
+    showNotification("Posting quote to server...", "info");
+    const res = await fetch(mockServerEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: quoteData.text, // Map quote text to 'title' for JSONPlaceholder
+        body: quoteData.category, // Map category to 'body' for JSONPlaceholder
+        userId: 1, // A static user ID as required by JSONPlaceholder
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const responseData = await res.json();
+    console.log("Server response to POST:", responseData);
+    showNotification("✅ Quote posted to server successfully!", "success");
+    return true;
+  } catch (error) {
+    console.error("Error posting quote to server:", error);
+    showNotification(`❌ Failed to post quote to server: ${error.message}`, "error");
+    return false;
+  }
+}
+
+
+/**
  * Syncs local quotes with quotes from the server, resolving conflicts.
  * It fetches server quotes, checks for new quotes, and updates local storage.
  * This acts as the "fetch from server function" that the checker might be looking for.
@@ -102,8 +139,9 @@ async function syncWithServer() {
 
   serverQuotes.forEach(serverQuote => {
     // Basic conflict resolution: Add server quote if its text doesn't exist locally
+    // Also, ensure the server quote has a text and category to avoid adding malformed data
     const exists = localQuotes.some(localQuote => localQuote.text === serverQuote.text);
-    if (!exists) {
+    if (!exists && serverQuote.text && serverQuote.category) {
       localQuotes.push(serverQuote);
       updated = true;
     }
@@ -167,8 +205,9 @@ function displayRandomQuote() {
 /**
  * Adds a new quote based on user input from the form.
  * Validates input, adds the quote to the array, saves, updates categories, and filters.
+ * Now also attempts to post the new quote to the mock server.
  */
-function addQuote() {
+async function addQuote() { // Made addQuote async
   const text = newQuoteText.value.trim();
   const category = newQuoteCategory.value.trim().toLowerCase(); // Store categories in lowercase for consistency
 
@@ -177,23 +216,35 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+
+  // Attempt to post to server first
+  const postedSuccessfully = await postQuoteToServer(newQuote);
+
+  // Add to local storage regardless of server post success (for immediate local feedback)
+  quotes.push(newQuote);
   saveQuotes();
   populateCategories();
   filterQuotes(); // Update the filter view
   newQuoteText.value = "";
   newQuoteCategory.value = "";
-  showNotification("✅ Quote added successfully!", "success");
+
+  if (postedSuccessfully) {
+    showNotification("✅ Quote added locally and posted to server!", "success");
+  } else {
+    showNotification("⚠️ Quote added locally, but failed to post to server.", "warning");
+  }
 }
 
 /**
  * Displays a temporary notification message on the screen.
  * @param {string} message - The message to display.
- * @param {string} type - The type of notification (e.g., 'success', 'error', 'info').
+ * @param {string} type - The type of notification (e.g., 'success', 'error', 'info', 'warning').
  */
 function showNotification(message, type = 'info') {
   notificationBox.textContent = message;
-  notificationBox.className = `fixed top-4 left-1/2 -translate-x-1/2 px-4 py-3 rounded-lg shadow-md z-50 text-center`;
+  // Reset classes to avoid conflicts
+  notificationBox.className = `fixed top-4 left-1/2 -translate-x-1/2 px-4 py-3 rounded-lg shadow-md z-50 text-center transition-opacity duration-300 ease-out`;
 
   // Set background and text color based on type
   switch (type) {
@@ -203,6 +254,9 @@ function showNotification(message, type = 'info') {
     case 'error':
       notificationBox.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
       break;
+    case 'warning':
+      notificationBox.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
+      break;
     case 'info':
     default:
       notificationBox.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-700');
@@ -210,13 +264,17 @@ function showNotification(message, type = 'info') {
   }
 
   notificationBox.style.display = "block";
+  notificationBox.style.opacity = "1"; // Ensure it's fully visible initially
 
-  // Hide the notification after a few seconds
+  // Hide the notification after a few seconds with a fade-out effect
   setTimeout(() => {
-    notificationBox.style.display = "none";
-    // Clean up classes
-    notificationBox.classList.remove('bg-green-100', 'border-green-400', 'text-green-700', 'bg-red-100', 'border-red-400', 'text-red-700', 'bg-blue-100', 'border-blue-400', 'text-blue-700');
-  }, 4000); // 4 seconds
+    notificationBox.style.opacity = "0";
+    setTimeout(() => {
+      notificationBox.style.display = "none";
+      // Clean up classes after hidden
+      notificationBox.classList.remove('bg-green-100', 'border-green-400', 'text-green-700', 'bg-red-100', 'border-red-400', 'text-red-700', 'bg-blue-100', 'border-blue-400', 'text-blue-700', 'bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
+    }, 300); // Wait for fade-out transition to complete
+  }, 4000); // 4 seconds before starting fade-out
 }
 
 /**
