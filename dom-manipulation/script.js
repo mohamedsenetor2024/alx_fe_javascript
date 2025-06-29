@@ -16,6 +16,11 @@ const exportBtn = document.getElementById("exportBtn");
 const importFile = document.getElementById("importFile");
 const categoryFilter = document.getElementById("categoryFilter");
 
+
+// Mock server endpoint (simulated using JSONPlaceholder for demo)
+const mockServerEndpoint = "https://jsonplaceholder.typicode.com/posts";
+
+
 // Save quotes to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
@@ -40,6 +45,44 @@ function populateCategories() {
     categoryFilter.appendChild(option2);
   });
 }
+
+async function syncWithServer() {
+  try {
+    const res = await fetch(mockServerEndpoint);
+    const serverQuotes = await res.json();
+
+    // Simulate quote objects from server response
+    const formattedQuotes = serverQuotes.slice(0, 5).map(post => ({
+      text: post.title,
+      category: "server"
+    }));
+
+    let localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+    let updated = false;
+
+    // Add only new server quotes (by text)
+    formattedQuotes.forEach(serverQuote => {
+      const exists = localQuotes.some(localQuote => localQuote.text === serverQuote.text);
+      if (!exists) {
+        localQuotes.push(serverQuote);
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      quotes = localQuotes;
+      localStorage.setItem("quotes", JSON.stringify(quotes));
+      populateCategories();
+      filterQuotes();
+      showNotification("✅ Quotes synced from server.");
+    }
+  } catch (error) {
+    console.error("Error syncing:", error);
+    showNotification("⚠️ Failed to sync with server.");
+  }
+}
+
+
 
 // Show filtered quotes
 function filterQuotes() {
@@ -98,6 +141,16 @@ function addQuote() {
   alert("Quote added!");
 }
 
+function showNotification(message) {
+  const box = document.getElementById("notification");
+  box.textContent = message;
+  box.style.display = "block";
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 4000);
+}
+
+
 // Export quotes to JSON file
 function exportQuotes() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
@@ -147,3 +200,9 @@ importFile.addEventListener("change", importFromJsonFile);
 // Initialize on load
 populateCategories();
 restoreFilter();
+
+// Auto-sync every 30 seconds
+setInterval(syncWithServer, 30000);
+
+// Optionally run on first page load
+syncWithServer();
